@@ -41,8 +41,8 @@ void ServiceSubsystem::sendMesurements() {
   }
   
   msg = "{\n\
-          \"motion\": " + String(this->samplingSys->getMotion()) + ";\n\
-          \"lightLevel\": " + String(this->samplingSys->getLightLevel()) + ";\n\
+          \"motion\": " + String(this->samplingSys->getMotion()) + ",\n\
+          \"lightLevel\": " + String(this->samplingSys->getLightLevel()) + "\n\
         }";
   this->mqttClient->loop();
   if (this->mqttClient->publish(this->topic, msg.c_str())) {
