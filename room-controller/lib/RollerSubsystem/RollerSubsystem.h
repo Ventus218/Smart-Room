@@ -14,7 +14,7 @@ private:
   Lever* roller;
   InputSubsystem* inputSys;
 
-  void setRoller(int rollerValue);
+  void setRoller(int rollerPercentage);
 
 public:
   RollerSubsystem(Lever* roller, InputSubsystem* inputSys);  

@@ -13,7 +13,7 @@ void RollerSubsystem::init(int period) {
 void RollerSubsystem::tick() {
   switch (getState()) {
     case RollerSubsystemState::ROLLER_CONTROL:
-      setRoller(inputSys->getRollerValue());
+      setRoller(inputSys->getRollerPercentage());
       break;
     case RollerSubsystemState::INIT:
       log(F("should not tick in INIT state"), LogLevel::WARNING);
@@ -21,8 +21,8 @@ void RollerSubsystem::tick() {
   }
 }
 
-void RollerSubsystem::setRoller(int rollerValue) {
-  int angle = map(rollerValue, 0, 1024, 0, 180);
+void RollerSubsystem::setRoller(int rollerPercentage) {
+  int angle = map(rollerPercentage, 0, 100, 0, 180);
   this->roller->setAngle(angle);
 }
 

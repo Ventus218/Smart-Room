@@ -11,7 +11,7 @@ class InputSubsystem: public Task, public StateSystem<InputSubsystemState> {
 
 private:
   bool lightOn;
-  int rollerValue;
+  int rollerPercentage;
 
   void checkForStateTransitions();
 
@@ -25,7 +25,7 @@ public:
   void tick();
 
   bool getLightOn();
-  int getRollerValue();
+  int getRollerPercentage();
 
   String getSystemName();
   String stateToString(InputSubsystemState s);

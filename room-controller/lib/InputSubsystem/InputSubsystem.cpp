@@ -1,4 +1,6 @@
 #include <InputSubsystem.h>
+#include <MsgService.h>
+#include <utils.h>
 
 InputSubsystem::InputSubsystem(): StateSystem(InputSubsystemState::INIT) { }
 
@@ -7,28 +9,43 @@ void InputSubsystem::checkForStateTransitions() {
 }
 
 void InputSubsystem::receiveStateFromService() {
-  // **** MOCKUP ****
-  this->lightOn = (rand() % 2);
-  this->rollerValue = (rand() % 1024);
-  log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerValue + String(" (from service)"), LogLevel::INFO);
-  // **** MOCKUP ****
+  if (MsgService.isMsgAvailable()) {
+    Msg* msg = MsgService.receiveMsg();
+    String myContent = msg->getContent();
+
+    // Getting only the last message received.
+    int lastSeparatorIndex = myContent.lastIndexOf(";");
+    
+    // Message encoding: "lightOn;RollerPercentage" as "int;int"
+    String lightOnStr = myContent.substring(lastSeparatorIndex - 1, lastSeparatorIndex);
+    String rollerPercentageStr = myContent.substring(lastSeparatorIndex + 1, myContent.length());
+
+    this->lightOn = String(lightOnStr).toInt();
+    this->rollerPercentage = String(rollerPercentageStr).toInt();
+    log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerPercentage + String(" (from service)"), LogLevel::INFO);  
+    
+    delete msg;
+  }
 }
 
 void InputSubsystem::receiveStateFromBluetooth() {
   // **** MOCKUP ****
   this->lightOn = (rand() % 2);
-  this->rollerValue = (rand() % 1024);
-  log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerValue + String(" (from bluetooth)"), LogLevel::INFO);
+  this->rollerPercentage = (rand() % 101);
+  log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerPercentage + String(" (from bluetooth)"), LogLevel::INFO);
   // **** MOCKUP ****
 }
 
 void InputSubsystem::updateServiceState() {
-  // TODO
+  MsgService.sendMsg(String("BLUETOOTH;" + (lightOn ? String("true") : String("false")) + ";" + String(rollerPercentage)));
 }
 
 void InputSubsystem::init(int period) {
   Task::init(period);
+  MsgService.init();
   srand(millis()); // NEEDED ONLY FOR MOCKUP
+  this->lightOn = false;
+  this->rollerPercentage = 0;
   this->receiveStateFromService();
   transitionTo(InputSubsystemState::SERVICE);
 }
@@ -54,8 +71,8 @@ bool InputSubsystem::getLightOn() {
     return this->lightOn;
 }
 
-int InputSubsystem::getRollerValue() {
-    return this->rollerValue;
+int InputSubsystem::getRollerPercentage() {
+    return this->rollerPercentage;
 }
 
 String InputSubsystem::getSystemName() {
