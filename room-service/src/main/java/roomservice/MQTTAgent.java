@@ -1,12 +1,15 @@
 package roomservice;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.json.Json;
 import io.vertx.mqtt.MqttClient;
 
-public class MQTTAgent extends AbstractVerticle {
+import java.util.ArrayList;
+import java.util.List;
 
-    public MQTTAgent() {
-    }
+public class MQTTAgent extends AbstractVerticle implements RoomSensorService {
+
+    private List<RoomSensorSubscriber> subscribers = new ArrayList();
 
     @Override
     public void start() {
@@ -21,15 +24,26 @@ public class MQTTAgent extends AbstractVerticle {
 //                System.out.println("There are new message in topic: " + s.topicName());
 //                System.out.println("Content(as string) of the message: " + s.payload().toString());
 //                System.out.println("QoS: " + s.qosLevel());
-                System.out.println("sensor-board:\t" + s.payload().toString());
+                SensorBoardMessage message = Json.decodeValue(s.payload().toString(), SensorBoardMessage.class);
+                log("MQTT message received: " +  message.toString());
+                notifySubscribers(message);
+
             })
-            .subscribe("esiot-2022/aleventu/sensor-board", 2);
+            .subscribe("esiot-2022/aleventu/sensor-board", 0);
         });
     }
 
-
     private void log(String msg) {
-        System.out.println("[MQTT AGENT] "+msg);
+        System.out.println("[ROOM-SENSOR] "+msg);
     }
 
+    public synchronized void subscribe(RoomSensorSubscriber sub) {
+        this.subscribers.add(sub);
+    }
+
+    private void notifySubscribers(SensorBoardMessage message) {
+        for (RoomSensorSubscriber sub : subscribers) {
+            sub.newSensorStateAvailable(message);
+        }
+    }
 }
