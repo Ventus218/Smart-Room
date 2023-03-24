@@ -15,10 +15,12 @@ public class HTTPServer extends AbstractVerticle {
 
     private RoomService roomService;
     private String roomDashboardPath;
+    private int roomDashboardPort;
 
-    public HTTPServer(RoomService roomService, String roomDashboardPath) {
+    public HTTPServer(RoomService roomService, String roomDashboardPath, int roomDashboardPort) {
         this.roomService = roomService;
         this.roomDashboardPath = roomDashboardPath;
+        this.roomDashboardPort = roomDashboardPort;
     }
 
     @Override
@@ -87,9 +89,9 @@ public class HTTPServer extends AbstractVerticle {
                 // Handle every request using the router
                 .requestHandler(router)
                 // Start listening
-                .listen(8080)
+                .listen(roomDashboardPort)
                 // Print the port
-                .onSuccess(server -> System.out.println("HTTP server started on port " + server.actualPort()));
+                .onSuccess(server -> log("server started on port " + server.actualPort()));
     }
 
 

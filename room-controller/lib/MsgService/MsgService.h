@@ -12,13 +12,8 @@ public:
   }
   
   String getContent(){
-    return this->content;
+    return content;
   }
-};
-
-class Pattern {
-public:
-  virtual boolean match(const Msg& m) = 0;  
 };
 
 class MsgServiceClass {
@@ -33,11 +28,6 @@ public:
   bool isMsgAvailable();
   Msg* receiveMsg();
 
-  bool isMsgAvailable(Pattern& pattern);
-
-  /* note: message deallocation is responsibility of the client */
-  Msg* receiveMsg(Pattern& pattern);
-  
   void sendMsg(const String& msg);
 };
 

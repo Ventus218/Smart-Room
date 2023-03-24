@@ -1,5 +1,5 @@
 
-const apiRootPath = "http://localhost:8080";
+const apiRootPath = "http://localhost:8081";
 
 const controlButton = document.getElementById("take_control_button");
 const lightCheckbox = document.getElementById("light_on_checkbox");
@@ -54,6 +54,11 @@ function updateUI() {
 
         if (controllerData.controlState != "WEB_INTERFACE") {
             controlButton.innerText = "Take control";
+            if (controllerData.controlState == "BLUETOOTH") {
+                controlButton.disabled = true;
+            } else {
+                controlButton.disabled = false;
+            }
             lightCheckbox.disabled = true;
             rollerRange.disabled = true;
             rollerRangeLabel.style.color = "lightgray";
@@ -73,8 +78,8 @@ function updateUI() {
             lightCheckboxLabel.style.color = "initial"; 
             rollerRange.disabled = false;
             rollerRangeLabel.style.color = "initial";
+            controlButton.disabled = false;
         }
-        controlButton.disabled = false;
     }
 
     while (historyTableBody.hasChildNodes()) {

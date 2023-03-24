@@ -5,35 +5,100 @@
 InputSubsystem::InputSubsystem(): StateSystem(InputSubsystemState::INIT) { }
 
 void InputSubsystem::checkForStateTransitions() {
-  // TODO
+  if (inputCount == 0) { return; }
+
+  InputSubsystemState nextState = getState();
+
+  for (int i = 0; i < inputCount; i++)
+  {
+    InputSubsystemInput* inp = input[i];
+    switch (nextState) {
+      case InputSubsystemState::SERVICE:
+        if (inp->changeFlag == InputChangeFlag::BT_CONN) {
+          nextState = InputSubsystemState::BLUETOOTH;
+        }
+        break;
+      case InputSubsystemState::BLUETOOTH:
+        if (inp->changeFlag == InputChangeFlag::BT_DISC) {
+          nextState = InputSubsystemState::SERVICE;
+        }
+        break;
+      case InputSubsystemState::INIT:
+        log(F("transition from INIT state should be treated in the init method"), LogLevel::WARNING);
+        break;
+    }
+  }
+  if (nextState != getState()) {
+    transitionTo(nextState);
+  }
 }
 
-void InputSubsystem::receiveStateFromService() {
+void InputSubsystem::sample() {
   if (MsgService.isMsgAvailable()) {
     Msg* msg = MsgService.receiveMsg();
     String myContent = msg->getContent();
+    String firstMessage;
+    int lastSeparatorIndex;
 
-    // Getting only the last message received.
-    int lastSeparatorIndex = myContent.lastIndexOf(";");
-    
-    // Message encoding: "lightOn;RollerPercentage" as "int;int"
-    String lightOnStr = myContent.substring(lastSeparatorIndex - 1, lastSeparatorIndex);
-    String rollerPercentageStr = myContent.substring(lastSeparatorIndex + 1, myContent.length());
+    int endOfFirstMessage = myContent.indexOf(':');
+    while (endOfFirstMessage != -1) {
+      firstMessage = myContent.substring(0, endOfFirstMessage);
+      myContent = myContent.substring(endOfFirstMessage + 1, myContent.length());
+      lastSeparatorIndex = firstMessage.lastIndexOf(";");
 
-    this->lightOn = String(lightOnStr).toInt();
-    this->rollerPercentage = String(rollerPercentageStr).toInt();
-    log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerPercentage + String(" (from service)"), LogLevel::INFO);  
-    
+      // Message encoding: "inputChangeFlag;inputSource;lightOn;rollerPercentage" as "int;int;int;int"
+      InputChangeFlag flag = (InputChangeFlag)firstMessage.substring(lastSeparatorIndex - 5, lastSeparatorIndex - 4).toInt();
+      InputSource source = (InputSource)firstMessage.substring(lastSeparatorIndex - 3, lastSeparatorIndex - 2).toInt();
+      String lightOnStr = firstMessage.substring(lastSeparatorIndex - 1, lastSeparatorIndex);
+      String rollerPercentageStr = firstMessage.substring(lastSeparatorIndex + 1, firstMessage.length());
+
+      input[inputCount++] = new InputSubsystemInput(flag, source, lightOnStr.toInt(), rollerPercentageStr.toInt());
+
+      endOfFirstMessage = myContent.indexOf(':');
+    }
     delete msg;
   }
 }
 
-void InputSubsystem::receiveStateFromBluetooth() {
-  // **** MOCKUP ****
-  this->lightOn = (rand() % 2);
-  this->rollerPercentage = (rand() % 101);
-  log(String("light: ") + (this->lightOn ? String("ON") : String("OFF")) + String("\troller: ") + this->rollerPercentage + String(" (from bluetooth)"), LogLevel::INFO);
-  // **** MOCKUP ****
+void InputSubsystem::enterState(InputSubsystemState s) {
+  StateSystem::enterState(s);
+
+  switch (getState()) {
+    case InputSubsystemState::SERVICE:
+      MsgService.sendMsg("SERVICE");
+      break;
+    case InputSubsystemState::BLUETOOTH:
+      MsgService.sendMsg("BLUETOOTH$"); // TODO CHECK IF NEEDED
+      break;
+    case InputSubsystemState::INIT:
+      log(F("should never enter INIT state"), LogLevel::WARNING);
+      break;
+  }
+}
+
+void InputSubsystem::consumeInput() {
+  if (inputCount <= 0) { return; }
+
+  for (int i = 0; i < inputCount; i++) {
+    InputSubsystemInput* in = input[i];
+
+    if ((getState() == InputSubsystemState::BLUETOOTH && in->source == InputSource::SERVICE) || (getState() == InputSubsystemState::SERVICE && in->source == InputSource::BLUETOOTH)) {
+      delete in;
+      break; // ignoring service input while in bt connection or viceversa
+    }
+
+    this->lightOn = in->lightOn;
+    this->rollerPercentage = in->rollerPercentage;
+
+    String source = in->source == InputSource::BLUETOOTH ? "BLUETOOTH" : "SERVICE";
+    String light = this->lightOn ? String("ON") : String("OFF");
+
+    log("Input from: " + source + String("\tlight: ") + light + String("\troller: ") + this->rollerPercentage, LogLevel::INFO);
+
+    delete in;
+  }
+
+  inputCount = 0;
 }
 
 void InputSubsystem::updateServiceState() {
@@ -43,22 +108,23 @@ void InputSubsystem::updateServiceState() {
 void InputSubsystem::init(int period) {
   Task::init(period);
   MsgService.init();
-  srand(millis()); // NEEDED ONLY FOR MOCKUP
   this->lightOn = false;
   this->rollerPercentage = 0;
-  this->receiveStateFromService();
+  this->inputCount = 0;
+  this->sample();
   transitionTo(InputSubsystemState::SERVICE);
 }
 
 void InputSubsystem::tick() {
+  sample();
   checkForStateTransitions();
 
   switch (StateSystem::getState()) {
     case InputSubsystemState::SERVICE:
-      this->receiveStateFromService();
+      this->consumeInput();
       break;
     case InputSubsystemState::BLUETOOTH:
-      this->receiveStateFromBluetooth();
+      this->consumeInput();
       this->updateServiceState();
       break;
     case InputSubsystemState::INIT:

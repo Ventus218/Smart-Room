@@ -13,11 +13,12 @@
 Scheduler sched;
 
 void setup() {
-  Logger::init(9600, LogLevel::INFO);
-  sched.init(1000);
+  Logger::init(9600, LogLevel::WARNING);
+
+  sched.init(50);
 
   InputSubsystem* inputSys = new InputSubsystem();
-  inputSys->init(1000);
+  inputSys->init(50);
 
   RollerSubsystem* rollerSys = new RollerSubsystem(new ServoMotor(PIN_SERVO), inputSys);
   rollerSys->init(1000);

@@ -1,7 +1,7 @@
 package roomservice;
 
 import serialcommunication.CommChannel;
-import serialcommunication.SerialCommChannel;
+import serialcommunication.ExtendedSerialCommChannel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +36,12 @@ public class RoomControllerCommunication extends Thread implements RoomControlle
     }
 
     private void init() throws Exception {
-        this.channel = new SerialCommChannel(port, rate);
+        this.channel = new ExtendedSerialCommChannel(port, rate);
 
         /* attesa necessaria per fare in modo che Arduino completi il reboot */
-        System.out.println("Waiting Arduino for rebooting...");
+        log("Waiting for boot...");
         sleep(5000);
-        System.out.println("Ready.");
+        log("Ready.");
     }
 
     @Override

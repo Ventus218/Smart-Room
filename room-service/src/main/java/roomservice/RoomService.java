@@ -109,7 +109,8 @@ public class RoomService implements RoomControllerCommunicationSubscriber, RoomS
     }
 
     private String encodeRoomControllerInput(RoomControllerInput input) {
-        return (input.isLightOn() ? "1" : "0") + ";" + input.getRollerPercentage() + "\n";
+        // Message encoding: "inputChangeFlag;inputSource;lightOn;rollerPercentage" as "int;int;int;int"
+        return "0;0;" + (input.isLightOn() ? "1" : "0") + ";" + input.getRollerPercentage();
     }
 
     private int map(int value, int inMin, int inMax, int outMin, int outMax) {

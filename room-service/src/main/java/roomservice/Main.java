@@ -17,7 +17,7 @@ public class Main {
         //MockRoomSensorService roomSensorService = new MockRoomSensorService(2000);
         roomSensorService.subscribe(roomService);
 
-        HTTPServer server = new HTTPServer(roomService, "/Users/Alessandro/Desktop/Smart-Room/room-dashboard");
+        HTTPServer server = new HTTPServer(roomService, "/Users/Alessandro/Desktop/Smart-Room/room-dashboard", 8081);
 
         roomControllerService.subscribe(roomService);
 

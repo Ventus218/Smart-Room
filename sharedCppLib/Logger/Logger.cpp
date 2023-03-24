@@ -10,6 +10,8 @@ void Logger::init(unsigned long baud, LogLevel logLevel) {
     }
 
     Serial.begin(baud);
+    while (!Serial){}
+    
     Logger::logLevel = logLevel;
     Logger::hasBeenInitialized = true;
 }

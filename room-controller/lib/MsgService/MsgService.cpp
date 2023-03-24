@@ -41,29 +41,19 @@ void serialEvent() {
       if (MsgService.currentMsg != NULL) {
         delete MsgService.currentMsg;
       }
+
+      if (content[content.length() - 1] == '$') {
+        content[content.length() - 1] = ':';
+      } else {
+        content += ':';
+      }
       MsgService.currentMsg = new Msg(content);
       MsgService.msgAvailable = true;
+      // content = ""; // setting content to "" here would be correct but it causes some weird bugs.
+      // this translates to the fact that every Msg contains all the previous content and the last message should be extracted.
+      // separating messages has been accomplished using this message separator => :
     } else {
       content += ch;  
     }
   }
 }
-
-bool MsgServiceClass::isMsgAvailable(Pattern& pattern){
-  return (msgAvailable && pattern.match(*currentMsg));
-}
-
-Msg* MsgServiceClass::receiveMsg(Pattern& pattern){
-  if (msgAvailable && pattern.match(*currentMsg)){
-    Msg* msg = currentMsg;
-    msgAvailable = false;
-    currentMsg = NULL;
-    content = "";
-    return msg;  
-  } else {
-    return NULL; 
-  }
-  
-}
-
-

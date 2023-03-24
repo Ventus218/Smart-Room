@@ -21,9 +21,6 @@ public class MQTTAgent extends AbstractVerticle implements RoomSensorService {
 
             log("subscribing...");
             client.publishHandler(s -> {
-//                System.out.println("There are new message in topic: " + s.topicName());
-//                System.out.println("Content(as string) of the message: " + s.payload().toString());
-//                System.out.println("QoS: " + s.qosLevel());
                 SensorBoardMessage message = Json.decodeValue(s.payload().toString(), SensorBoardMessage.class);
                 log("MQTT message received: " +  message.toString());
                 notifySubscribers(message);
