@@ -68,7 +68,6 @@ void InputSubsystem::enterState(InputSubsystemState s) {
       MsgService.sendMsg("SERVICE");
       break;
     case InputSubsystemState::BLUETOOTH:
-      MsgService.sendMsg("BLUETOOTH$"); // TODO CHECK IF NEEDED
       break;
     case InputSubsystemState::INIT:
       log(F("should never enter INIT state"), LogLevel::WARNING);
