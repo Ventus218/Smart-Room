@@ -16,7 +16,7 @@ public class RoomControllerCommunication extends Thread implements RoomControlle
     private Optional<String> sendMessage;
 
     public RoomControllerCommunication(String port, int rate) {
-        this.subscribers = new ArrayList<RoomControllerCommunicationSubscriber>();
+        this.subscribers = new ArrayList<>();
         this.port = port;
         this.rate = rate;
         this.channel = null;
