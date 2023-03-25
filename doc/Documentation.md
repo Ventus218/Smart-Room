@@ -31,8 +31,9 @@ Sebbene a dare l'input possano essere tre entità (**Room Service**, **Dashboard
 Quando si trova nello stato *bluetooth* il **Controller** aggiorna periodicamente il **Service** in maniera da poter mantenere aggiornata la **Dashboard**. Per eventuali miglioramenti futuri sarebbe fattibile anche aggiornare periodicamente l'**App** quando il **Controller** prende l'input dal **Service**, ma non è altrettanto necessario in quanto, come da specifica, non è richiesto che l'**App** monitori lo stato della stanza.
 
 <details>
-<summary> Note sull'implementazione dell'<span style="font-weight: bold;">Input Subsystem</span> </summary>
-<h5 id="InputSubsystemInput" style="display: none;">InputSubsystemInput</h5>
+<summary>
+    <span id="InputSubsystemInput"> Note sull'implementazione dell'<span style="font-weight: bold;">Input Subsystem </span> </span>
+</summary>
 
 Siccome i periodi del **Controller** potrebbero essere modificati, e quindi potrebbero diventare addirittura più lunghi dell'invio degli input da parte del **Service** o dell'**App**, e siccome il **Service** e l'**App** potrebbero inviare messaggi in maniera molto ravvicinata si è deciso di permettere l'accumulo dei messaggi di input.
 
