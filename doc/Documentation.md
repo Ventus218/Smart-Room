@@ -12,12 +12,16 @@ Per prima cosa si sono progettati il la **Room Sensor Board** e il **Room Contro
 ![Diagramma degli stati di Sensor Board e Controller](./img/state_diagrams.png)
 
 ### Room Sensor Board
+![Room Sensor Board schema (Tinkercard)](./img/room_sensor_board.png)
+
 La **Room Sensor Board** è composta da tre sottosistemi:
 - Sampling Subsystem: si occupa di raccogliere i dati dai sensori e li mette a disposizione degli altri sottosistemi.
 - Led Subsystem: si occupa di accendere e spegnere il led che indica la rilevazione del movimento nella stanza.
 - Service Subsystem: si occupa di mandare in continuazione i dati dei sensori al **Room Service**
 
 ### Room Controller
+![Room Controller schema (Tinkercard)](./img/room_controller.png)
+
 Il **Room Controller** è composto da tre sottosistemi:
 - Light Subsystem: si occupa di accendere e spegnere la luce della stanza.
 - Roller Subsystem: si occupa di svolgere o avvolgere le tapparelle.
