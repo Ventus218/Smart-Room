@@ -3,6 +3,8 @@
 ## Progetto di sistemi embedded e IOT
 [Qui](./Specificaitions.pdf) è possibile trovare le specifiche.
 
+[Qui](./vid/smart_room_video_no_audio.mp4) è possibile trovare il video dimostrativo.
+
 ## Assunzioni e scelte progettuali
 Si è deciso che l'**App**, in quanto connessa direttamente al **Controller**, abbia la precedenza su qualsia altro sistema di controllo.
 Ad esempio infatti se la **Dashboard** ha il controllo questo può essere sottratto dall'**App** mentre non è invece possibile il contrario.
