@@ -32,6 +32,7 @@ Quando si trova nello stato *bluetooth* il **Controller** aggiorna periodicament
 
 <details>
 <summary> Note sull'implementazione dell'<span style="font-weight: bold;">Input Subsystem</span> </summary>
+<h5 id="InputSubsystemInput" style="display: none;">InputSubsystemInput</h5>
 
 Siccome i periodi del **Controller** potrebbero essere modificati, e quindi potrebbero diventare addirittura più lunghi dell'invio degli input da parte del **Service** o dell'**App**, e siccome il **Service** e l'**App** potrebbero inviare messaggi in maniera molto ravvicinata si è deciso di permettere l'accumulo dei messaggi di input.
 
@@ -71,3 +72,47 @@ Si noti infine che essendo il seriale l'unico canale di comunicazione su cui dev
 Per semplicità l'unica contromisura a questo problema è stata quella di tenere i messaggi più corti possibile in modo da ridurre la probabilità di collisione.
 Eventualmente sarebbe possibile decidere una lunghezza fissa dei messaggi (in caso di messaggi più brevi inserire un padding) in questo modo se due messaggi dovessero collidere ci si potrebbe rendere conto della collisione e scartare i dati ricevuti.
 </details>
+
+### Room Dashboard
+![Room Dashboard](./img/dashboard.png)
+La **Dashboard** è molto basica e tutta la logica viene eseguita nel browser del client.
+
+Essa è divisa in 4 sezioni (dall'alto verso il basso):
+
+1. Sensor board: mostra in tempo reale le rilevazioni del sensore.
+1. Controller: mostra in tempo reale lo stato del controller.
+1. Light history: come da specifiche mostra lo storico dello stato della lampadina della stanza. Per mantenere alta la precisione ma senza mostrare un grafico troppo confusionario si è deciso di mostrare in forma tabellare tutti i cambi di stato della luce.
+1. Control: permette di controllare luce e tapparelle direttamente dalla dashboard.
+
+La **Dashboard** funziona a polling, a intervalli regolari richiede via HTTP al **Service** tutti i dati necessari.
+
+Come detto in precedenza la **Dashboard** non potrà prendere il controllo nel caso in cui a controllare ci fosse già l'**App** e se invece l'**App** dovesse richiedere il controllo mentre questo era dato alla **Dashboard** esso verrà revocato.
+
+#### Note
+Durante il primo giorno di avvio del sistema la **Dashboard** a 00:00:00 segnerà la luce in stato *???*. Questo è dovuto al fatto che se il sistema è stato avviato dopo 00:00:00 chiaramente non sarebbe corretto mostrare uno stato *ON* o *OFF*.
+
+### Room App
+<div style="display: flex; justify-content: space-evenly">
+    <img style="width: 40%;" src="./img/app_1.png" alt="App senza controllo">
+    <img style="width: 40%;" src="./img/app_2.png" alt="App con controllo">
+</div>
+
+Anche l'**App** è stata tenuta volutamente semplice. Essa è infatti composta da un'unica *Activity* che si comporta come la sezione *Control* della **Dashboard**.
+
+Non avendo un dispositivo Android si è sfruttato il componente software fornito a lezione per emulare il comportamento del Bluetooth attraverso la linea seriale.
+
+L'**App** apre la connessione seriale appena viene aperta e non appena si chiude la finestra (anche senza terminare l'applicazione) la connessione viene chiusa.
+Grazie ai messaggi di input visti [sopra](#InputSubsystemInput), l'**App** può prendere o lasciare il controllo e settare manualmente luci e tapparelle.
+
+#### Possibili miglioramenti
+Non è richiesto dalle specifiche, ma sarebbe utile far sì che il **Controller** informi l'**App** del suo stato corrente (quando non è l'**App** a controllarlo) un po' come fa con il **Service** quando a controllarlo è l'**App**.
+
+Inoltre dato il fatto che l'**App** tenta subito di aprire la connessione seriale appena avviata essa crasha nel caso in cui venga aperta prima di aver avviato il sistema (**Service** e **Controller**).
+
+### Room Service
+Il **Service** è la parte centrale di tutto il sistema, è stato realizzato in Java utilizzando il framework Vertx per creare il server HTTP e il client MQTT.
+
+Esso si occupa di mantenere lo storico dei dati del **Controller**, in modo da poterli fornire alla **Dashboard** e soprattuto di governare in maniera automatica (seguendo le specifiche fornite) il **Controller** quando né l'**App** né la **Dashboard** hanno il controllo.
+
+#### Possibili miglioramenti
+Il **Service** funziona ma il codice potrebbe essere riscritto in maniera più ordinata e comprensibile.
