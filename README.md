@@ -1,2 +1,2 @@
 # Smart Room
- Smart room using arduino, esp-32 and mqtt. Web and Android interface
+ Look at the documentation [here](./doc/Documentation.md).
